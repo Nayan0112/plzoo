@@ -30,7 +30,9 @@ type mvalue =
   | MInt of int                        (** Integer *)
   | MBool of bool                      (** Boolean value *)
   | MClosure of name * frame * environ (** Closure *)
-
+  | MError                             (** Error state*)
+  | MDivisionByZero                     (** Exception*)  
+ 
 (**
    There are two kinds of machine instructions.
 
@@ -43,7 +45,9 @@ type mvalue =
 *)
 
 and instr =
+  | IErr                            (** error state *)
   | IMult                           (** multiplication *)
+  | IDiv                            (** division (may cause error state) *)
   | IAdd                            (** addition *)
   | ISub                            (** subtraction *)
   | IEqual                          (** equality *)
@@ -75,7 +79,9 @@ let error msg = raise (Machine_error msg)
 let string_of_mvalue = function
   | MInt k -> string_of_int k
   | MBool b -> string_of_bool b
-  | MClosure _ -> "<fun>" (** Closures cannot be reasonably displayed *)
+  | MClosure _ -> "<fun>" 
+  | MError -> "error"
+  | MDivisionByZero -> "DivisionByZero"
 
 (** [lookup x envs] scans through the list of environments [envs] and
     returns the first value of variable [x] found. *)
@@ -106,6 +112,11 @@ let mult = function
   | (MInt x) :: (MInt y) :: s -> MInt (y * x) :: s
   | _ -> error "int and int expected in mult"
 
+  let quot = function
+  | (MInt 0) :: (MInt _) :: s -> MDivisionByZero :: s
+  | (MInt x) :: (MInt y) :: s -> MInt (y / x) :: s
+  | _ -> error "int and int expected in mult"
+
 (** Addition *)
 let add = function
   | (MInt x) :: (MInt y) :: s -> MInt (y + x) :: s
@@ -132,8 +143,10 @@ let less = function
     environments. The return value is a new state. *)
 let exec instr frms stck envs =
   match instr with
+    | IErr -> ([], [MError], [])
     (* Arithmetic *)
     | IMult  -> (frms, mult stck, envs)
+    | IDiv   -> (frms, quot stck, envs)
     | IAdd   -> (frms, add stck, envs)
     | ISub   -> (frms, sub stck, envs)
     | IEqual -> (frms, equal stck, envs)

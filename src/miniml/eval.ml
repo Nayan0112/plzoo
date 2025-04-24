@@ -24,6 +24,11 @@ exception Runtime
 let rec eval1 = function
   | Var _ -> raise Runtime
   | Int _ | Bool _ | Fun _ -> raise Value
+  | Division (Int k1, Int k2) -> Int (k1 / k2)
+  | Division (Int k1, Abort)  -> Abort
+  | Division (Int k1, e2)  -> Division (Int k1, eval1 e2)
+  | Division (Abort, e2)   -> Abort
+  | Division (e1, e2)      -> Division (eval1 e1, e2)
   | Times (Int k1, Int k2) -> Int (k1 * k2)
   | Times (Int k1, e2)     -> Times (Int k1, eval1 e2)
   | Times (e1, e2)         -> Times (eval1 e1, e2)

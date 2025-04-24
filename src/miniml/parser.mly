@@ -11,8 +11,10 @@
 %token PLUS
 %token MINUS
 %token TIMES
+%token DIVIDE
 %token EQUAL LESS
 %token IF THEN ELSE
+%token TRY WITH
 %token FUN IS
 %token COLON
 %token LPAREN RPAREN
@@ -30,7 +32,7 @@
 %nonassoc ELSE
 %nonassoc EQUAL LESS
 %left PLUS MINUS
-%left TIMES
+%left TIMES DIVIDE
 %right TARROW
 
 %%
@@ -69,6 +71,8 @@ plain_expr:
     { Minus (e1, e2) }
   | e1 = expr TIMES e2 = expr
     { Times (e1, e2) }
+  | e1 = expr DIVIDE e2 = expr
+    { Division (e1, e2) }
   | e1 = expr EQUAL e2 = expr
     { Equal (e1, e2) }
   | e1 = expr LESS e2 = expr

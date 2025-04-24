@@ -18,11 +18,15 @@ and expr' =
   | Times of expr * expr 		(* Product [e1 * e2] *)
   | Plus of expr * expr  		(* Sum [e1 + e2] *)
   | Minus of expr * expr 		(* Difference [e1 - e2] *)
+  | Division of expr * expr             (* Division [e1/e2], may result in [Abort] *)
   | Equal of expr * expr 		(* Integer comparison [e1 = e2] *)
   | Less of expr * expr  		(* Integer comparison [e1 < e2] *)
   | If of expr * expr * expr 		(* Conditional [if e1 then e2 else e3] *)
+  | Try of expr * expr          (* Try e1 with e2*)
   | Fun of name * name * ty * ty * expr (* Function [fun f(x:s):t is e] *)
   | Apply of expr * expr 		(* Application [e1 e2] *)
+  | Abort                   (* Special value indicating an error*)
+
 
 (* Toplevel commands *)
 type command =
