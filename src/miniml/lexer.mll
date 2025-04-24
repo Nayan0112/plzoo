@@ -17,8 +17,8 @@ rule token = parse
   | "if"            { IF }
   | "then"          { THEN }
   | "else"          { ELSE }
-  | "try"           { TRY }
-  | "with"          { WITH }
+  (* | "try"           { TRY }
+  | "with"          { WITH } *)
   | "let"           { LET }  
   | ";;"            { SEMISEMI }
   | '='             { EQUAL }

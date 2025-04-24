@@ -20,6 +20,7 @@ let rec check ctx ty ({Zoo.loc;_} as e) =
     exception. *)
 and type_of ctx {Zoo.data=e; loc} =
   match e with
+    | Abort -> assert false (* this should not happen as the user has no way of referring to Abort *)
     | Var x ->
       (try List.assoc x ctx with
 	  Not_found -> typing_error ~loc "unknown variable %s" x)

@@ -14,7 +14,7 @@
 %token DIVIDE
 %token EQUAL LESS
 %token IF THEN ELSE
-%token TRY WITH
+// %token TRY WITH
 %token FUN IS
 %token COLON
 %token LPAREN RPAREN
