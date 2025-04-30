@@ -24,14 +24,15 @@
 (** The datatype of variable names. A more efficient implementation
     would use de Bruijn indices but we want to keep things simple. *)
 type name = Syntax.name
+type exn = Syntax.exn
+type expr = Syntax.expr
 
 (** Machine values. *)
 type mvalue =
   | MInt of int                        (** Integer *)
   | MBool of bool                      (** Boolean value *)
   | MClosure of name * frame * environ (** Closure *)
-  | MError                             (** Error state*)
-  | MDivisionByZero                     (** Exception*)  
+  | MExn of exn 
  
 (**
    There are two kinds of machine instructions.
@@ -45,7 +46,6 @@ type mvalue =
 *)
 
 and instr =
-  | IErr                            (** error state *)
   | IMult                           (** multiplication *)
   | IDiv                            (** division (may cause error state) *)
   | IAdd                            (** addition *)
@@ -59,6 +59,7 @@ and instr =
   | IBranch of frame * frame        (** branch *)
   | ICall                           (** execute a closure *)
   | IPopEnv                         (** pop environment *)
+  | ITry of (exn * frame) list  
 
 (** A frame is a list (stack) of instructions *)
 and frame = instr list
@@ -80,8 +81,9 @@ let string_of_mvalue = function
   | MInt k -> string_of_int k
   | MBool b -> string_of_bool b
   | MClosure _ -> "<fun>" 
-  | MError -> "error"
-  | MDivisionByZero -> "DivisionByZero"
+  | MExn e -> match e with 
+    | DivisionByZero -> "DivisionByZero"
+    | GenericException a -> "GenericException"^string_of_int a
 
 (** [lookup x envs] scans through the list of environments [envs] and
     returns the first value of variable [x] found. *)
@@ -113,7 +115,7 @@ let mult = function
   | _ -> error "int and int expected in mult"
 
   let quot = function
-  | (MInt 0) :: (MInt _) :: s -> MDivisionByZero :: s
+  | (MInt 0) :: (MInt _) :: s -> MExn Syntax.DivisionByZero :: s
   | (MInt x) :: (MInt y) :: s -> MInt (y / x) :: s
   | _ -> error "int and int expected in mult"
 
@@ -143,7 +145,6 @@ let less = function
     environments. The return value is a new state. *)
 let exec instr frms stck envs =
   match instr with
-    | IErr -> ([], [MError], [])
     (* Arithmetic *)
     | IMult  -> (frms, mult stck, envs)
     | IDiv   -> (frms, quot stck, envs)
@@ -172,7 +173,21 @@ let exec instr frms stck envs =
 	(match envs with
 	     [] -> error "no environment to pop"
 	   | _ :: envs' -> (frms, stck, envs'))
-
+    | ITry (cases) ->
+    let (v, stck') = pop stck in
+      (match v with
+        | MExn e ->
+            let rec search = function
+              | [] -> (frms, stck, envs)  
+              | (exn_case, exp) :: tl ->
+                  if exn_case = e then
+                    (exp :: frms, stck', envs)  
+                  else
+                    search tl
+            in
+            search cases
+        | _ -> (frms, stck, envs))
+  
 (** [run frm env] executes the frame [frm] in environment [env]. *)
 let run frm env =
   let rec loop = function

@@ -14,5 +14,6 @@ let mvalue m ppf =
     | Machine.MInt k -> Zoo.print_parens ppf "%d" k
     | Machine.MBool b -> Zoo.print_parens ppf "%b" b
     | Machine.MClosure _ -> Zoo.print_parens ppf "<fun>"
-    | Machine.MError -> Zoo.print_parens ppf "error"
-    | Machine.MDivisionByZero -> Zoo.print_parens ppf "division by zero error"
+    | Machine.MExn e -> match e with 
+      | DivisionByZero -> Zoo.print_parens ppf "Division by zero"
+      | GenericException a -> Zoo.print_parens ppf "%d" a 

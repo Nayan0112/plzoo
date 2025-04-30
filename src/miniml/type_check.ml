@@ -20,7 +20,6 @@ let rec check ctx ty ({Zoo.loc;_} as e) =
     exception. *)
 and type_of ctx {Zoo.data=e; loc} =
   match e with
-    | Abort -> assert false (* this should not happen as the user has no way of referring to Abort *)
     | Var x ->
       (try List.assoc x ctx with
 	  Not_found -> typing_error ~loc "unknown variable %s" x)
@@ -36,6 +35,11 @@ and type_of ctx {Zoo.data=e; loc} =
       check ctx TBool e1 ;
       let ty = type_of ctx e2 in
 	check ctx ty e3 ; ty
+    | Try (e1, cases) -> let ty = type_of ctx e1 in
+      let rec aux cases = match cases with
+      | []-> ty
+      | (_, exp) :: tl -> check ctx ty exp ; aux tl
+    in aux cases 
     | Fun (f, x, ty1, ty2, e) ->
       check ((f, TArrow(ty1,ty2)) :: (x, ty1) :: ctx) ty2 e ;
       TArrow (ty1, ty2)

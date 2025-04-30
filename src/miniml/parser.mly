@@ -14,7 +14,11 @@
 %token DIVIDE
 %token EQUAL LESS
 %token IF THEN ELSE
-// %token TRY WITH
+%token TRY WITH
+%token LBRACE RBRACE
+%token BAR
+%token DIVBYZERO
+%token GENEEXN
 %token FUN IS
 %token COLON
 %token LPAREN RPAREN
@@ -81,6 +85,19 @@ plain_expr:
     { If (e1, e2, e3) }
   | FUN x = VAR LPAREN f = VAR COLON t1 = ty RPAREN COLON t2 = ty IS e = expr
     { Fun (x, f, t1, t2, e) }
+  | TRY LBRACE e1 = expr RBRACE WITH LBRACE cases = nonempty_list(case) RBRACE
+    { Try(e1, cases) }
+
+exn :
+  | DIVBYZERO      
+    { DivisionByZero }
+  | GENEEXN e = INT  
+    { GenericException e }
+
+case:
+  | BAR e = exn TARROW e1 = expr 
+    { (e, e1) }
+
 
 app_expr: mark_position(plain_app_expr) { $1 }
 plain_app_expr:
