@@ -93,6 +93,8 @@ exn :
     { DivisionByZero }
   | GENEEXN e = INT  
     { GenericException e }
+  | GENEEXN MINUS e = INT
+    { GenericException (-e)}
 
 case:
   | BAR e = exn TARROW e1 = expr 
