@@ -32,7 +32,7 @@ type mvalue =
   | MInt of int                        (** Integer *)
   | MBool of bool                      (** Boolean value *)
   | MClosure of name * frame * environ (** Closure *)
-  | MExn of exn 
+  | MExn of exn                        (** Exception *)
  
 (**
    There are two kinds of machine instructions.
@@ -59,7 +59,7 @@ and instr =
   | IBranch of frame * frame        (** branch *)
   | ICall                           (** execute a closure *)
   | IPopEnv                         (** pop environment *)
-  | ITry of (exn * frame) list  
+  | IHandle of (exn * frame) list      (** Handles exception *)
 
 (** A frame is a list (stack) of instructions *)
 and frame = instr list
@@ -83,7 +83,7 @@ let string_of_mvalue = function
   | MClosure _ -> "<fun>" 
   | MExn e -> match e with 
     | DivisionByZero -> "DivisionByZero"
-    | GenericException a -> "GenericException"^string_of_int a
+    | GenericException a -> "GenericException "^string_of_int a
 
 (** [lookup x envs] scans through the list of environments [envs] and
     returns the first value of variable [x] found. *)
@@ -115,7 +115,7 @@ let mult = function
   | _ -> error "int and int expected in mult"
 
   let quot = function
-  | (MInt 0) :: (MInt _) :: s -> MExn Syntax.DivisionByZero :: s
+  | (MInt 0) :: (MInt _) :: s -> MExn DivisionByZero :: s
   | (MInt x) :: (MInt y) :: s -> MInt (y / x) :: s
   | _ -> error "int and int expected in mult"
 
@@ -173,7 +173,8 @@ let exec instr frms stck envs =
 	(match envs with
 	     [] -> error "no environment to pop"
 	   | _ :: envs' -> (frms, stck, envs'))
-    | ITry (cases) ->
+    (* Handling and raising exceptions *)
+    | IHandle (cases) ->
     let (v, stck') = pop stck in
       (match v with
         | MExn e ->
