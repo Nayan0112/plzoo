@@ -21,6 +21,7 @@ rule token = parse
   | "else"          { ELSE }
   | "try"           { TRY }
   | "with"          { WITH }
+  | "raise"         { RAISE }
   | "let"           { LET }  
   | ";;"            { SEMISEMI }
   | '='             { EQUAL }

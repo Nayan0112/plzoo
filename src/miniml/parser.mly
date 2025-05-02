@@ -16,6 +16,7 @@
 %token EQUAL LESS
 %token IF THEN ELSE
 %token TRY WITH
+%token RAISE
 %token LBRACE RBRACE
 %token BAR
 %token DIVBYZERO
@@ -88,6 +89,8 @@ plain_expr:
     { Fun (x, f, t1, t2, e) }
   | TRY LBRACE e1 = expr RBRACE WITH LBRACE cases = nonempty_list(case) RBRACE
     { Try(e1, cases) }
+  | RAISE e = exn 
+    { Raise e }
 
 exn :
   | DIVBYZERO      

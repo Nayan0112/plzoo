@@ -59,7 +59,8 @@ and instr =
   | IBranch of frame * frame        (** branch *)
   | ICall                           (** execute a closure *)
   | IPopEnv                         (** pop environment *)
-  | IHandle of (exn * frame) list      (** Handles exception *)
+  | IHandle of (exn * frame) list   (** Handles exception *)
+  | IRaise of exn                   (** Raises exception *)
 
 (** A frame is a list (stack) of instructions *)
 and frame = instr list
@@ -107,12 +108,13 @@ let pop_app = function
   | _ -> error "value and closure expected"
 
 (** Arithmetical operations take their arguments from a stack and put the
-    result onto the stack. We use auxiliary functions that do this. *)
+    result onto the stack. We use auxiliary functions that do this. 
+    Adding Generic Exception -1 when Type_error is detected *)
 
 (** Multiplication *)
 let mult = function
   | (MInt x) :: (MInt y) :: s -> MInt (y * x) :: s
-  | _ -> error "int and int expected in mult"
+  | _ -> [MExn (GenericException (-1))]
 
   let quot = function
   | (MInt 0) :: (MInt _) :: s -> MExn DivisionByZero :: s
@@ -122,22 +124,22 @@ let mult = function
 (** Addition *)
 let add = function
   | (MInt x) :: (MInt y) :: s -> MInt (y + x) :: s
-  | _ -> error "int and int expected in add"
+  | _ -> [MExn (GenericException (-1))]
 
 (** Subtraction *)
 let sub = function
   | (MInt x) :: (MInt y) :: s -> MInt (y - x) :: s
-  | _ -> error "int and int expected in sub"
+  | _ -> [MExn (GenericException (-1))]
 
 (** Equality *)
 let equal = function
   | (MInt x) :: (MInt y) :: s -> MBool (y = x) :: s
-  | _ -> error "int and int expected in equal"
+  | _ -> [MExn (GenericException (-1))]
 
 (** Less than *)
 let less = function
   | (MInt x) :: (MInt y) :: s -> MBool (y < x) :: s
-  | _ -> error "int and int expected in less"
+  | _ -> [MExn (GenericException (-1))]
 
 (** [exec instr frms stck envs] executes instruction [instr] in the
     given state [(frms, stck, envs)], where [frms] is a stack of frames,
@@ -145,6 +147,8 @@ let less = function
     environments. The return value is a new state. *)
 let exec instr frms stck envs =
   match instr with
+    (* Raising errors *)
+    | IRaise e -> ([], [MExn e], [])
     (* Arithmetic *)
     | IMult  -> (frms, mult stck, envs)
     | IDiv   -> (frms, quot stck, envs)
