@@ -29,7 +29,7 @@ and expr' =
   | Less of expr * expr  		(* Integer comparison [e1 < e2] *)
   | If of expr * expr * expr 		(* Conditional [if e1 then e2 else e3] *)
   | Try of expr * (exn * expr) list  (* Exception handling e1 with exception e and e2*)
-  | Raise of exn
+  | Raise of exn                      (* Raising an exception *)
   | Fun of name * name * ty * ty * expr (* Function [fun f(x:s):t is e] *)
   | Apply of expr * expr 		(* Application [e1 e2] *)
 
