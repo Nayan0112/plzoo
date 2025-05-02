@@ -2,6 +2,7 @@ let ty t ppf =
   let rec ty ~max_level t ppf =
     if not (Format.over_max_boxes ()) then
       match t with
+        | Syntax.TExn -> Zoo.print_parens ppf ~max_level ~at_level:0 "Exception"
         | Syntax.TInt -> Zoo.print_parens ppf ~max_level ~at_level:0 "int"
         | Syntax.TBool -> Zoo.print_parens ppf ~max_level ~at_level:0 "bool"
         | Syntax.TArrow (t1, t2) ->

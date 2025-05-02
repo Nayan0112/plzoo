@@ -117,7 +117,7 @@ let mult = function
   let quot = function
   | (MInt 0) :: (MInt _) :: s -> MExn DivisionByZero :: s
   | (MInt x) :: (MInt y) :: s -> MInt (y / x) :: s
-  | _ -> error "int and int expected in mult"
+  | _ -> [MExn (GenericException (-1))]
 
 (** Addition *)
 let add = function

@@ -8,6 +8,7 @@ type ty =
   | TInt              (* Integers *)
   | TBool             (* Booleans *)
   | TArrow of ty * ty (* Functions *)
+  | TExn 
 
 type exn = 
   | DivisionByZero

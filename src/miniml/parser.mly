@@ -5,6 +5,7 @@
 %token TINT
 %token TBOOL
 %token TARROW
+%token TEXN
 %token <Syntax.name> VAR
 %token <int> INT
 %token TRUE FALSE
@@ -122,6 +123,8 @@ plain_simple_expr:
     { e }    
 
 ty:
+  | TEXN 
+    { TExn }
   | TBOOL
     { TBool }
   | TINT
