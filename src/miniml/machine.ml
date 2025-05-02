@@ -116,6 +116,7 @@ let mult = function
   | (MInt x) :: (MInt y) :: s -> MInt (y * x) :: s
   | _ -> [MExn (GenericException (-1))]
 
+(** Division *)
   let quot = function
   | (MInt 0) :: (MInt _) :: s -> MExn DivisionByZero :: s
   | (MInt x) :: (MInt y) :: s -> MInt (y / x) :: s
