@@ -24,7 +24,7 @@ and type_of ctx {Zoo.data=e; loc} =
 	  Not_found -> typing_error ~loc "unknown variable %s" x)
     | Int _ -> TInt
     | Bool _ -> TBool
-    (* try ... with Type_error rasies a TExp which in machine is dynamically raised as Exception = GenericException -1 *)
+    (* try ... with Type_error rasies a TExp which in machine is dynamically raised as Exception = GenericException -1 but it is not implemented for functions *)
     | Division (e1, e2) -> (try check ctx TInt e1 ; check ctx TInt e2 ; TInt with Type_error -> TExn )
     | Times (e1, e2) -> (try check ctx TInt e1 ; check ctx TInt e2 ; TInt with Type_error -> TExn )
     | Plus (e1, e2) -> (try check ctx TInt e1 ; check ctx TInt e2 ; TInt with Type_error -> TExn )
